@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
@@ -11,7 +13,15 @@ import android.view.MenuItem;
 
 import com.joaquimley.faboptions.FabOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import eu.gruessung.amk.cards.NavCard;
+import eu.gruessung.amk.objects.Nav;
+
 public class MainActivity extends AppCompatActivity {
+
+    RecyclerView oList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,29 +30,28 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FabOptions fabOptions = (FabOptions) findViewById(R.id.fab_options);
-        fabOptions.setButtonsMenu(R.menu.menu);
+
+
+        oList = (RecyclerView) findViewById(R.id.cardList);
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        oList.setLayoutManager(llm);
+
+        //Menu aufbauen
+        List<Nav> list = new ArrayList<Nav>();
+        Nav item = new Nav();
+        item.sTitel = "Lernen";
+        item.iBild = R.drawable.books;
+        list.add(item);
+        Nav item2 = new Nav();
+        item2.sTitel = "Verwalten";
+        item2.iBild = R.drawable.medications;
+        list.add(item2);
+
+
+        NavCard oNavAdapter = new NavCard(list, this);
+        oList.setAdapter(oNavAdapter);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }
