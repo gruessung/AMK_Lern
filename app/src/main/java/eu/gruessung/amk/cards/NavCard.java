@@ -9,13 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
 
 import eu.gruessung.amk.R;
-import eu.gruessung.amk.VerwaltenActivity;
+import eu.gruessung.amk.WirkstoffgruppenActivity;
 import eu.gruessung.amk.objects.Nav;
 
 /**
@@ -43,7 +42,7 @@ public class NavCard extends RecyclerView.Adapter<NavCard.ItemViewHolder> {
             public void onClick(View view) {
 
                 if (view.getTag().toString() == "Verwalten") {
-                    Intent myIntent = new Intent(ctx, VerwaltenActivity.class);
+                    Intent myIntent = new Intent(ctx, WirkstoffgruppenActivity.class);
                     ctx.startActivity(myIntent);
                 } else if (view.getTag().toString() == "Lernen") {
                     Snackbar snackbar = Snackbar

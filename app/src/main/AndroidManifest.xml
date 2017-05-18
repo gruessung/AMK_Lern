@@ -23,8 +23,15 @@
         </activity>
 
         <activity
-            android:name=".VerwaltenActivity"
+            android:name=".WirkstoffgruppenActivity"
             android:label="Wirkstoffgruppen"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
+
+        <activity
+            android:name=".WirkstoffeActivity"
+            android:label="Wirkstoffe"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>

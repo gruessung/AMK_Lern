@@ -1,6 +1,5 @@
 package eu.gruessung.amk;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
@@ -11,14 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -39,12 +35,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.gruessung.amk.cards.NavCard;
+import eu.gruessung.amk.cards.WirkstoffCard;
 import eu.gruessung.amk.cards.WirkstoffgruppeCard;
-import eu.gruessung.amk.objects.Nav;
+import eu.gruessung.amk.objects.Wirkstoff;
 import eu.gruessung.amk.objects.Wirkstoffgruppe;
 
-public class VerwaltenActivity extends AppCompatActivity {
+public class WirkstoffeActivity extends AppCompatActivity {
 
     RecyclerView oList;
     Button selectFarbe;
@@ -53,6 +49,7 @@ public class VerwaltenActivity extends AppCompatActivity {
     RequestQueue queue;
     EditText name;
     String farbe;
+    String iGruppe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +58,10 @@ public class VerwaltenActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         act = this;
+
+
+        iGruppe = getIntent().getAction();
+        Log.d("GRUPPE", iGruppe);
 
         FloatingActionButton fb = (FloatingActionButton) findViewById(R.id.fab);
         fb.setOnClickListener(new View.OnClickListener() {
@@ -72,11 +73,13 @@ public class VerwaltenActivity extends AppCompatActivity {
                 AlertDialog.Builder db = new AlertDialog.Builder(act);
                 db.setView(dialog_layout);
                 selectFarbe = (Button) dialog_layout.findViewById(R.id.selectFarbe);
+                selectFarbe.setVisibility(View.INVISIBLE);
+
                 name = (EditText) dialog_layout.findViewById(R.id.name);
-                db.setTitle("Wirkstoffgruppe anlegen");
+                db.setTitle("Wirkstoff anlegen");
                 db.setPositiveButton("Speichern", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        url = "http://api.gruessung.eu/amk/?apikey=fdihfz89d7shf4krghf79dighf&request=insertwirkstoffgruppe";
+                        url = "http://api.gruessung.eu/amk/?apikey=fdihfz89d7shf4krghf79dighf&request=insertwirkstoff";
                         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                                 new Response.Listener<String>()
                                 {
@@ -95,7 +98,9 @@ public class VerwaltenActivity extends AppCompatActivity {
                                     @Override
                                     public void onErrorResponse(VolleyError error) {
                                         // error
-                                        Log.d("Error.Response", error.getMessage());
+                                        Snackbar snackbar = Snackbar
+                                                .make(oList, "Fehler beim Speichern" , Snackbar.LENGTH_LONG);
+                                        snackbar.show();
                                     }
                                 }
                         ) {
@@ -104,27 +109,11 @@ public class VerwaltenActivity extends AppCompatActivity {
                             {
                                 Map<String, String>  params = new HashMap<String, String>();
                                 params.put("name", name.getText().toString());
-                                params.put("farbe", farbe);
+                                params.put("wirkstoffgruppe", iGruppe);
                                 return params;
                             }
                         };
                         queue.add(postRequest);
-                    }
-                });
-                selectFarbe.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        final ColorPicker cp = new ColorPicker(act, 100, 100, 100);
-                        cp.show();
-
-                        cp.setCallback(new ColorPickerCallback() {
-                            @Override
-                            public void onColorChosen(@ColorInt int color) {
-                                selectFarbe.setBackgroundColor(color);
-                                farbe = String.valueOf(color);
-                                cp.dismiss();
-                            }
-                        });
                     }
                 });
                 final AlertDialog dialog = db.show();
@@ -141,28 +130,21 @@ public class VerwaltenActivity extends AppCompatActivity {
     public void fetchData() {
         //Daten holen und verarbeiten
         RequestQueue rq = Volley.newRequestQueue(this);
-        JsonArrayRequest jReq = new JsonArrayRequest("http://api.gruessung.eu/amk/?apikey=fdihfz89d7shf4krghf79dighf&request=holewirkstoffgruppen",
+        JsonArrayRequest jReq = new JsonArrayRequest("http://api.gruessung.eu/amk/?apikey=fdihfz89d7shf4krghf79dighf&request=holewirkstoffe&wirkstoffgruppe="+iGruppe,
                 new Response.Listener<JSONArray>() {
-
                     @Override
                     public void onResponse(JSONArray response) {
-                        List<Wirkstoffgruppe> result = new ArrayList<Wirkstoffgruppe>();
-
-
-
+                        List<Wirkstoff> result = new ArrayList<Wirkstoff>();
                         for (int i = 0; i < response.length(); i++) {
 
                             try {
-                                result.add(convertJSONWirkstoffgruppe(response
+                                result.add(convertJSONWirkstoffe(response
                                         .getJSONObject(i)));
                             } catch (JSONException e) {
 
                             }
                         }
-
-
-
-                        WirkstoffgruppeCard oListAdapter = new WirkstoffgruppeCard(result, getApplicationContext());
+                        WirkstoffCard oListAdapter = new WirkstoffCard(result, getApplicationContext());
                         oList.setAdapter(oListAdapter);
 
                     }
@@ -170,6 +152,7 @@ public class VerwaltenActivity extends AppCompatActivity {
 
             @Override
             public void onErrorResponse(VolleyError error) {
+                Log.d("FEHLER", error.getMessage());
                 Snackbar snackbar = Snackbar
                         .make(oList, "Keine Internetverbindung :(", Snackbar.LENGTH_LONG);
                 snackbar.show();
@@ -179,14 +162,14 @@ public class VerwaltenActivity extends AppCompatActivity {
         rq.add(jReq);
     }
 
-    public Wirkstoffgruppe convertJSONWirkstoffgruppe(JSONObject c) {
+    public Wirkstoff convertJSONWirkstoffe(JSONObject c) {
         // Storing each json item in variable
-        Wirkstoffgruppe item = new Wirkstoffgruppe();
+        Wirkstoff item = new Wirkstoff();
         try {
             item.id = c.getInt("id");
             item.sTitel = c.getString("name");
             item.sBeschreibung = c.getString("beschreibung");
-            item.sFarbe = c.getString("farbe");
+            item.iWirkstoffgruppe = c.getInt("wirkstoffgruppe");
         } catch (JSONException e) {
         }
         return item;
